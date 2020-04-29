@@ -1,11 +1,13 @@
 package com.atguigu.gulimall.product.service.impl;
 
+import com.atguigu.common.constant.ProductConstant;
 import com.atguigu.common.to.SkuReductionTo;
 import com.atguigu.common.to.SpuBoundTo;
 import com.atguigu.common.to.es.SkuEsModel;
 import com.atguigu.common.utils.R;
 import com.atguigu.gulimall.product.entity.*;
 import com.atguigu.gulimall.product.feign.CouponFeignService;
+import com.atguigu.gulimall.product.feign.SearchFeignService;
 import com.atguigu.gulimall.product.service.*;
 import com.atguigu.gulimall.product.vo.*;
 import org.springframework.beans.BeanUtils;
@@ -13,10 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -61,6 +60,8 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
     private CategoryService categoryService ;
     @Autowired
     private ProductAttrValueService productAttrValueService ;
+    @Autowired
+    private SearchFeignService searchFeignService ;
 
     @Override
     public PageUtils queryPage(Map<String, Object> params) {
@@ -256,6 +257,18 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
         //获取可检索的属性信息
         List<Long> attrIds = baseAttrs.stream().map(item->item.getAttrId()).collect(Collectors.toList()); ;
         //获取可检索的属性的id
+        List<Long> temp = attrService.getSearchAttrIds(attrIds) ;
+        Set<Long> set = new HashSet<>(temp) ;
+
+        List<SkuEsModel.Attr> attrsList = baseAttrs.stream().filter(item -> set.contains(item.getAttrId()))
+                .map((entity) -> {
+                    SkuEsModel.Attr attr = new SkuEsModel.Attr();
+                    attr.setAttrValue(entity.getAttrValue());
+                    attr.setAttrName(entity.getAttrName());
+                    attr.setAttrId(entity.getAttrId());
+                    return attr;
+                })
+                .collect(Collectors.toList());
 
         List<SkuInfoEntity> skuInfoEntities = skuInfoService.getSkuInfoBySpuId(spuId) ;
         List<SkuEsModel> esModels = skuInfoEntities.stream().map((item)->{
@@ -264,6 +277,9 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
             model.setSkuPrice(item.getPrice());
             model.setSkuImg(item.getSkuDefaultImg()) ;
             //TODO ,调用远程的系统查看是否有库存
+            model.setHasStock(false);
+            // 设置热度评分
+            model.setHotScore(0L);
             //查询品牌信息
             BrandEntity brandEntity = brandService.getById(item.getBrandId()) ;
             model.setBrandImg(brandEntity.getLogo());
@@ -272,8 +288,17 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
             CategoryEntity categoryEntity = categoryService.getById(item.getCatalogId());
             model.setCatalogName(categoryEntity.getName());
             // 查询当前sku的所有的规格属性【可以用被来检索的】
+            model.setAttrs(attrsList);
             return  model ;
         }).collect(Collectors.toList());
+
+      R result = searchFeignService.save(esModels) ;
+     //表示上架成功
+      if(result.getCode() == 0){
+        baseMapper.updateSpuStatus(spuId, ProductConstant.StatusEnum.SPU_UP.getCode()) ;
+      }
+
+
     }
 
 
