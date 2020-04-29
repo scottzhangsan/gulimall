@@ -10,6 +10,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.io.FileInputStream;
@@ -38,6 +39,9 @@ public class GulimallProductApplicationTests {
     @Autowired
     CategoryService categoryService;
 
+    @Autowired
+    StringRedisTemplate stringRedisTemplate ;
+
     @Test
     public void testFindPath(){
         Long[] catelogPath = categoryService.findCatelogPath(225L);
@@ -65,6 +69,10 @@ public class GulimallProductApplicationTests {
             System.out.println(item);
         });
 
+    }
+    @Test
+    public void redisTest(){
+        stringRedisTemplate.opsForValue().set("k2","v2");
     }
 
 }
