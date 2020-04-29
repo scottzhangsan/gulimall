@@ -59,6 +59,8 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
     private BrandService brandService ;
     @Autowired
     private CategoryService categoryService ;
+    @Autowired
+    private ProductAttrValueService productAttrValueService ;
 
     @Override
     public PageUtils queryPage(Map<String, Object> params) {
@@ -243,8 +245,18 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
         return new PageUtils(page);
     }
 
+    /**
+     * 商品上架的功能
+     * @param spuId
+     */
     @Override
     public void up(Long spuId) {
+      //根据spuId获取商品的属性信息
+        List<ProductAttrValueEntity> baseAttrs = productAttrValueService.baseAttrlistforspu(spuId) ;
+        //获取可检索的属性信息
+        List<Long> attrIds = baseAttrs.stream().map(item->item.getAttrId()).collect(Collectors.toList()); ;
+        //获取可检索的属性的id
+
         List<SkuInfoEntity> skuInfoEntities = skuInfoService.getSkuInfoBySpuId(spuId) ;
         List<SkuEsModel> esModels = skuInfoEntities.stream().map((item)->{
             SkuEsModel model = new SkuEsModel();
