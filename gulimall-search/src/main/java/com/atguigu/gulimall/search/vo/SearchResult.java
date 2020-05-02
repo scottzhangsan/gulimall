@@ -5,7 +5,7 @@ import lombok.Data;
 
 import java.util.List;
 @Data
-public class SerachResponse {
+public class SearchResult {
 
    private  List<SkuEsModel> products ;  //所有的商品信息、
     //如下所有的分页信息
@@ -14,5 +14,6 @@ public class SerachResponse {
     private Integer totalPages ;
     private List<BrandVo> brands ; //当前查询结果涉及到的所有的品牌
     private List<AttrVo> attrs ; // 当前查询结果涉及到的所有的属性
+    private List<CatalogVo> catalogs ; //当前查询结果涉及到的所有的分类
 
 }
