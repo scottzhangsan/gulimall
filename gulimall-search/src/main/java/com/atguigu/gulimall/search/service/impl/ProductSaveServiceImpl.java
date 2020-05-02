@@ -10,6 +10,7 @@ import org.elasticsearch.action.bulk.BulkRequest;
 import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.client.RestHighLevelClient;
+import org.elasticsearch.common.xcontent.XContentType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -30,6 +31,7 @@ public class ProductSaveServiceImpl implements ProductSaveService {
             IndexRequest indexRequest = new IndexRequest(EsProductConstant.PRODUCT_INDEX);
             indexRequest.id(model.getSkuId().toString()) ;
             String s = JSON.toJSONString(model);
+            indexRequest.source(s, XContentType.JSON) ;
             bulkRequest.add(indexRequest) ;
         }
         BulkResponse bulk = client.bulk(bulkRequest, GulimallSearchElasticsearchConfig.COMMON_OPTIONS);
