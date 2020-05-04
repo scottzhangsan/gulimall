@@ -1,5 +1,7 @@
 package com.atguigu.gulimall.search.service.impl;
 
+import com.alibaba.fastjson.JSON;
+import com.atguigu.common.to.es.SkuEsModel;
 import com.atguigu.gulimall.search.config.GulimallSearchElasticsearchConfig;
 import com.atguigu.gulimall.search.constant.EsProductConstant;
 import com.atguigu.gulimall.search.service.MallSearchService;
@@ -16,6 +18,8 @@ import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.NestedQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.RangeQueryBuilder;
+import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
 import org.elasticsearch.search.sort.SortOrder;
@@ -23,6 +27,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @Slf4j
@@ -35,16 +41,43 @@ public class MallSearchServiceImpl implements MallSearchService {
         //构建查询请求
         SearchRequest request = buildSearchRequest(param) ;
         try {
-            SearchResponse search = client.search(request, GulimallSearchElasticsearchConfig.COMMON_OPTIONS);
+            //查询请求响应
+            SearchResponse response = client.search(request, GulimallSearchElasticsearchConfig.COMMON_OPTIONS);
+            log.info(response.toString());
+            return buildSearchResult(response,param);
         } catch (IOException e) {
            log.error("调用es服务查询出错",e);
            return  null ;
         }
-        return null;
+
+
     }
 
-    private SearchResult buildSearchResult(SearchResponse response){
+    /**
+     *请求响应转换
+     * @param response
+     * @param param
+     * @return
+     */
+    private SearchResult buildSearchResult(SearchResponse response,SearchParam param){
         SearchResult result = new SearchResult();
+        long total = response.getHits().getTotalHits().value ;
+        result.setTotal(total);
+        result.setPageNum(param.getPageNum());
+        Long pageSize = total%param.getPageNum() == 0 ? total/param.getPageNum() : total/param.getPageNum()+1 ;
+        result.setTotalPages(Integer.valueOf(pageSize.toString()));
+        SearchHits hits = response.getHits();
+        List<SkuEsModel> models = new ArrayList<>() ;
+        if(hits != null) {
+            for (SearchHit hit : hits.getHits()) {
+                 SkuEsModel model = new SkuEsModel() ;
+                 String value = hit.getSourceAsString() ; // 获取值
+                 model = JSON.parseObject(value,SkuEsModel.class) ;
+                 models.add(model) ;
+            }
+        }
+        // TODO,待获取聚合的信息,调用远程服务获取
+        result.setProducts(models);
         return result ;
     }
 
@@ -56,6 +89,7 @@ public class MallSearchServiceImpl implements MallSearchService {
      * @return
      */
     private SearchRequest buildSearchRequest(SearchParam param) {
+        // ES查询builder
         SearchSourceBuilder builder = new SearchSourceBuilder();
         BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
         //1:查询条件的封装

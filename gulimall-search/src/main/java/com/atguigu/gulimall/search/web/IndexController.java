@@ -21,7 +21,7 @@ public class IndexController {
     }
     @GetMapping("/list.html")
     public String list(SearchParam param,Model model){
-        mallSearchService.search(param) ;
+        model.addAttribute("result",mallSearchService.search(param) ) ;
         return "list" ;
     }
 

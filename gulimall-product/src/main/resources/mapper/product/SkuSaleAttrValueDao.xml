@@ -12,6 +12,18 @@
         <result property="attrValue" column="attr_value"/>
         <result property="attrSort" column="attr_sort"/>
     </resultMap>
+    <select id="getItemSaleAttrBySpuId" resultType="com.atguigu.gulimall.product.vo.SkuItemSaleAttrVo">
+SELECT
+ssav.`attr_id` attrId,
+ssav.`attr_name` attrName,
+GROUP_CONCAT(DISTINCT ssav.`attr_value`) attrValues
+ FROM `pms_sku_info` info
+LEFT JOIN `pms_sku_sale_attr_value` ssav
+ON info.`sku_id`=ssav.`sku_id`
+WHERE spu_id =#{spuId}
+GROUP BY ssav.`attr_id`,ssav.`attr_name`
+
+    </select>
 
 
 </mapper>
