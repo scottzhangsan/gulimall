@@ -1,0 +1,18 @@
+spring:
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 127.0.0.1:8848
+  datasource:
+    username: root
+    password: root
+    url: jdbc:mysql://150.158.106.207:3306/gulimall_pms?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true
+    driver-class-name: com.mysql.jdbc.Driver
+  application:
+    name: gulimall-auth-server
+  redis:
+    host: 150.158.106.207
+    password: 123456
+
+server:
+  port: 20000
