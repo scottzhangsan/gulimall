@@ -21,3 +21,5 @@ buildNumber.properties
 **/.gitignore
 /gulimall.iml
 /gulimall-common/gulimall-common.iml
+/gulimall-auth-server/gulimall-auth-server.iml
+/gulimall-third-server/gulimall-third-server.iml
