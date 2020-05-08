@@ -2,7 +2,7 @@ spring:
   datasource:
     username: root
     password: root
-    url: jdbc:mysql://192.168.56.10:3306/gulimall_ums
+    url: jdbc:mysql://150.158.106.207:3306/gulimall_ums?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true
     driver-class-name: com.mysql.jdbc.Driver
 
   cloud:
@@ -19,3 +19,7 @@ mybatis-plus:
       id-type: auto
 server:
   port: 8000
+
+logging:
+  level:
+    com.atguigu.gulimall: debug

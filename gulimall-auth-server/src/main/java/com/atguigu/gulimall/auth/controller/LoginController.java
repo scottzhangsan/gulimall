@@ -1,20 +1,31 @@
 package com.atguigu.gulimall.auth.controller;
 
+import com.alibaba.fastjson.JSON;
 import com.atguigu.common.constant.AuthServerConstant;
 import com.atguigu.common.exception.BizCodeEnume;
 import com.atguigu.common.utils.R;
+import com.atguigu.gulimall.auth.feign.MemberFeignService;
 import com.atguigu.gulimall.auth.feign.ThirdServerFeignService;
+import com.atguigu.gulimall.auth.vo.UserLoginVo;
+import com.atguigu.gulimall.auth.vo.UserRegisterVo;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import javax.validation.Valid;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/login")
@@ -23,6 +34,8 @@ public class LoginController {
     private ThirdServerFeignService thirdServerFeignService ;
     @Autowired
     private StringRedisTemplate redisTemplate ;
+    @Autowired
+    private MemberFeignService memberFeignService ;
 
 
     @GetMapping("/sendCode")
@@ -45,4 +58,35 @@ public class LoginController {
        return R.ok() ;
 
     }
+
+    @PostMapping("/register")
+    public String register(@Valid UserRegisterVo vo, BindingResult result,RedirectAttributes attributes){
+       // 当有校验不通过的时候
+        if (result.hasErrors()){
+            Map<String,String> errors = new HashMap<>() ;
+            List<FieldError> fieldErrors = result.getFieldErrors();
+            for (FieldError error:fieldErrors) {
+                errors.put(error.getField(),error.getDefaultMessage()) ;
+            }
+            attributes.addFlashAttribute("errors",errors) ;
+           return "redirect:http://localhost:20000/reg.html" ;
+         }
+
+        // TODO,校验通过调用接口保存注册的数据
+        memberFeignService.register(vo) ;
+        return "redirect:http://localhost:20000/login.html" ;
+    }
+
+    @PostMapping("/login")
+    public String login(UserLoginVo loginVo){
+        R result = memberFeignService.login(loginVo) ;
+        if (result.getCode() == 0){
+            //成功
+            return "success" ;
+        }else{
+            return "redirect:http://localhost:20000/login.html" ;
+        }
+
+    }
+
 }

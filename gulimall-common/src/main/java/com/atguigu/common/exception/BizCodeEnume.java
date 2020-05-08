@@ -19,7 +19,8 @@ public enum BizCodeEnume {
     UNKNOW_EXCEPTION(10000,"系统未知异常"),
     VAILD_EXCEPTION(10001,"参数格式校验失败"),
     VALID_SMS_CODE_EXCEPTION(10002,"验证码校验错误") ,
-    PRODUCT_UP_EXCEPTION(11000,"商品上架异常") ;
+    PRODUCT_UP_EXCEPTION(11000,"商品上架异常") ,
+    LOGIN_ERROR_EXCEPTION(12000,"登录失败") ;
 
     private int code;
     private String msg;
