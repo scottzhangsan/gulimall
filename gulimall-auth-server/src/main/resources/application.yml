@@ -13,6 +13,8 @@ spring:
   redis:
     host: 150.158.106.207
     password: 123456
+  session:
+    store-type: redis
 
 server:
   port: 20000

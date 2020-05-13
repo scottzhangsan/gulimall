@@ -3,10 +3,12 @@ package com.atguigu.gulimall.member.controller;
 import java.util.Arrays;
 import java.util.Map;
 
+import com.alibaba.fastjson.JSON;
 import com.atguigu.common.exception.BizCodeEnume;
 import com.atguigu.gulimall.member.feign.CouponFeignService;
 import com.atguigu.gulimall.member.vo.MemberLoginVo;
 import com.atguigu.gulimall.member.vo.MemberRegisterVo;
+import com.atguigu.gulimall.member.vo.OauthLoginVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -121,6 +123,13 @@ public class MemberController {
        return R.error(BizCodeEnume.LOGIN_ERROR_EXCEPTION.getCode(),BizCodeEnume.LOGIN_ERROR_EXCEPTION.getMsg());
       }
       return  R.ok() ;
+    }
+
+
+    @PostMapping("/oauth/login")
+    public R oauthLogin(@RequestBody OauthLoginVo loginVo){
+        MemberEntity entity = memberService.oauthLogin(loginVo);
+        return  R.ok().put("result", JSON.toJSONString(entity)) ;
     }
 
 }
