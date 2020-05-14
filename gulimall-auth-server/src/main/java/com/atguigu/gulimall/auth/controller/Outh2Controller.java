@@ -2,17 +2,15 @@ package com.atguigu.gulimall.auth.controller;
 
 import com.alibaba.fastjson.JSON;
 import com.atguigu.common.utils.R;
+import com.atguigu.common.vo.MemberEntityResponseVo;
 import com.atguigu.gulimall.auth.dto.AccessTokenResponseDto;
 import com.atguigu.gulimall.auth.feign.MemberFeignService;
-
-import com.atguigu.gulimall.auth.vo.MemberEntityResponseVo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.client.RestTemplate;
-
 import javax.servlet.http.HttpSession;
 
 /*
@@ -55,7 +53,6 @@ public class Outh2Controller {
             log.error("微博登录失败：", e);
             return "redirect:http://localhost:20000/login.html";
         }
-
     }
 
     @GetMapping("/test")

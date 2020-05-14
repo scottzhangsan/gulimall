@@ -1,0 +1,26 @@
+spring:
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 127.0.0.1:8848
+      config:
+        server-addr: 127.0.0.1:8848
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+  application:
+    name: gulimall-cart
+  thymeleaf:
+    cache: false
+  redis:
+    host: 150.158.106.207
+    password: 123456
+
+
+
+server:
+  port: 20002
+logging:
+  level:
+    com.atguigu.gulimall: debug
+
+

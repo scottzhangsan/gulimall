@@ -17,8 +17,8 @@ public class ThreadPoolConfig {
      * @return
      */
 
-
-    public static Executor createExecutor(){
+    @Bean
+    public ThreadPoolExecutor createExecutor(){
         ThreadPoolExecutor executor = new ThreadPoolExecutor(2, 10, 10, TimeUnit.SECONDS,
                 new LinkedBlockingDeque<>(10), Executors.defaultThreadFactory(), new ThreadPoolExecutor.AbortPolicy());
        return  executor ;
