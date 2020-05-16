@@ -24,3 +24,12 @@ logging:
     com.atguigu.gulimall: debug
 
 
+gulimall:
+  thread:
+    coreSize: 10
+    maxSize:  20
+    keepAliveTime: 10
+    workQueueSize: 20
+
+
+
