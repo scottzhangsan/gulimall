@@ -26,10 +26,13 @@ public class CartInterceptor implements HandlerInterceptor {
      */
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+        //获取session
         HttpSession session = request.getSession() ;
         UserInfoTo userInfoTo = new UserInfoTo() ;
+        //从session中获取登录的对象
         MemberEntityResponseVo userVo = (MemberEntityResponseVo) session.getAttribute(AuthServerConstant.LOGIN_USER);
         if (userVo != null){
+            //不为空设置userId
             userInfoTo.setUserId(userVo.getId());
         }
         Cookie[]  cookies = request.getCookies() ;
@@ -40,11 +43,11 @@ public class CartInterceptor implements HandlerInterceptor {
                 }
             }
         }
-
+        //如果是未登录的用户，设置user_key,针对浏览器
         if (userInfoTo.getUserKey() == null){
             userInfoTo.setUserKey(UUID.randomUUID().toString().replace("-",""));
         }
-
+       //当前的用户信息设置的threaLocal中
         threadLocal.set(userInfoTo);  
         return true;
     }
@@ -59,6 +62,7 @@ public class CartInterceptor implements HandlerInterceptor {
      */
     @Override
     public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView) throws Exception {
+     //目标方法执行完毕后，如果不存在user_key的cookie信息.设置cookien的name为user_key的值
       UserInfoTo userInfoTo = threadLocal.get() ;
       boolean flag = false ;
         Cookie[] cookies = request.getCookies();
@@ -67,7 +71,6 @@ public class CartInterceptor implements HandlerInterceptor {
                 flag = true ;
             }
         }
-
         if (!flag){
             Cookie cookie = new Cookie(CartConstant.TEMP_USER_COOKIE_NAME,userInfoTo.getUserKey());
             cookie.setDomain("localhost");

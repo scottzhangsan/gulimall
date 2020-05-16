@@ -8,7 +8,7 @@ import java.util.List;
 
 public class Cart {
 
-    List<CartItem> items ;
+    private List<CartItem> items ;
 
     private Integer countNum ; //商品数量
 
@@ -18,6 +18,13 @@ public class Cart {
 
     private BigDecimal reduce ; //减免价格
 
+    public void setItems(List<CartItem> items) {
+        this.items = items;
+    }
+
+    public List<CartItem> getItems() {
+        return items;
+    }
     public Integer getCountType() {
         int count = 0 ;
         if(CollectionUtils.isNotEmpty(this.items)){

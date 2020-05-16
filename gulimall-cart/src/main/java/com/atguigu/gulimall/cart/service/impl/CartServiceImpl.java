@@ -7,18 +7,23 @@ import com.atguigu.common.utils.R;
 import com.atguigu.gulimall.cart.feign.ProductFeignService;
 import com.atguigu.gulimall.cart.interceptor.CartInterceptor;
 import com.atguigu.gulimall.cart.service.CartService;
+import com.atguigu.gulimall.cart.vo.Cart;
 import com.atguigu.gulimall.cart.vo.CartItem;
 import com.atguigu.gulimall.cart.vo.SkuInfoVo;
 import com.atguigu.gulimall.cart.vo.UserInfoTo;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.BoundHashOperations;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ThreadPoolExecutor;
+import java.util.stream.Collectors;
 
 @Service
 public class CartServiceImpl implements CartService {
@@ -64,6 +69,69 @@ public class CartServiceImpl implements CartService {
             boundHashOperations.put(skuId+"",JSON.toJSONString(item));
            return  item ;
         }
+    }
+
+
+    @Override
+    public Cart getCart() {
+        Cart cart = new Cart() ;
+        //获取登录用户的信息
+        UserInfoTo userInfoTo = CartInterceptor.threadLocal.get() ;
+        //需要判断当前用户是否登录
+        if (userInfoTo.getUserId() != null){
+            //获取当前登录用户的用户的购物车信息
+            String userKey = CartConstant.USER_CART_PREFIX+userInfoTo.getUserId() ;
+            BoundHashOperations<String, Object, Object> boundHashOperations = redisTemplate.boundHashOps(userKey);
+            //获取所有的值
+            List<Object> values = boundHashOperations.values();
+            List<CartItem> cartItems1 = new ArrayList<>();
+            if (CollectionUtils.isNotEmpty(values)){
+               cartItems1 = getCartItems(values);
+            }
+           //获取用户未登录时的浏览数据
+            List<CartItem> cartItems2 = new ArrayList<>() ;
+            if (userInfoTo.getUserKey() != null ){
+                String key = CartConstant.USER_CART_PREFIX+userInfoTo.getUserKey() ;
+                BoundHashOperations<String, Object, Object> operations = redisTemplate.boundHashOps(key);
+                List<Object> values1 = operations.values();
+                if (CollectionUtils.isNotEmpty(values1)){
+                    cartItems2 = getCartItems(values1);
+                }
+                //清空redis中未登录的用户的数据
+                operations.delete(key) ;
+            }
+            cartItems1.addAll(cartItems2) ;
+            cart.setItems(cartItems1);
+
+        }else{
+               //获取用户未登录时的浏览数据
+            List<CartItem> cartItems2 = new ArrayList<>() ;
+            if (userInfoTo.getUserKey() != null ){
+                String key = CartConstant.USER_CART_PREFIX+userInfoTo.getUserKey() ;
+                BoundHashOperations<String, Object, Object> operations = redisTemplate.boundHashOps(key);
+                List<Object> values1 = operations.values();
+                if (CollectionUtils.isNotEmpty(values1)){
+                    cartItems2 = getCartItems(values1);
+                }
+            }
+            cart.setItems(cartItems2);
+        }
+        return cart;
+    }
+    /**
+     *
+     * @param values1 获取购物车的详情数据
+     * @return
+     */
+    private List<CartItem> getCartItems(List<Object> values1) {
+        List<CartItem> cartItems2;
+        cartItems2 = values1.stream().map((result) -> {
+            String temp = (String) result;
+            CartItem cartItem = new CartItem();
+            cartItem = JSON.parseObject(temp, CartItem.class);
+            return cartItem;
+        }).collect(Collectors.toList());
+        return cartItems2;
     }
 
     private BoundHashOperations<String, Object, Object> getBoundHashOperationsByKey() {
