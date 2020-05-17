@@ -2,8 +2,10 @@ package com.atguigu.gulimall.cart.controller;
 
 import com.atguigu.common.utils.R;
 import com.atguigu.gulimall.cart.service.CartService;
+import com.atguigu.gulimall.cart.vo.CartItem;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -16,8 +18,9 @@ public class CartController {
 
 
     @GetMapping("/addCart")
-    public String addToCart(@RequestParam("skuId") Long skuId, @RequestParam("num") Integer num) throws Exception {
-        cartService.addCart(skuId,num) ;
+    public String addToCart(@RequestParam("skuId") Long skuId, @RequestParam("num") Integer num, Model model) throws Exception {
+        CartItem cartItem = cartService.addCart(skuId, num);
+        model.addAttribute("item",cartItem) ;
         return "success" ;
     }
 
