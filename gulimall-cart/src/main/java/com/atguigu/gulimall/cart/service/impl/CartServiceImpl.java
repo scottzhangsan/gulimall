@@ -118,6 +118,29 @@ public class CartServiceImpl implements CartService {
         }
         return cart;
     }
+
+    /**'
+     * 获取用户选中的购物车的信息
+     * @param memberId
+     * @return
+     */
+    @Override
+    public List<CartItem> getCartItemsByMemberId(Long memberId) {
+        String key = CartConstant.USER_CART_PREFIX+memberId;
+        BoundHashOperations<String, Object, Object> boundHashOperations = redisTemplate.boundHashOps(key);
+        //保存的是Json类型的字符串
+        List<Object> values = boundHashOperations.values();
+        if (CollectionUtils.isNotEmpty(values)){
+            List<CartItem> items = values.stream().map((result)->{
+                CartItem cartItem  =JSON.parseObject(result.toString(),CartItem.class) ;
+                return  cartItem ;
+            }).filter((item)-> item.getCheck()).collect(Collectors.toList());
+            return items ;
+        }
+
+        return  null ;
+    }
+
     /**
      *
      * @param values1 获取购物车的详情数据

@@ -7,8 +7,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+
+import java.util.List;
 
 @Controller
 public class CartController {
@@ -33,5 +36,17 @@ public class CartController {
     public R getCart(){
         return R.ok().put("result",cartService.getCart()) ;
     }
+
+    /**
+     * 获取用户选中的购物车的信息
+     * @param memberId
+     * @return
+     */
+    @GetMapping("/getCheckItem/{memberId}")
+    @ResponseBody
+    public List<CartItem> getCheckItem(@PathVariable("memberId") Long memberId){
+        return  cartService.getCartItemsByMemberId(memberId) ;
+    }
+
 
 }
