@@ -8,7 +8,10 @@
 
 package com.atguigu.common.utils;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.TypeReference;
 import org.apache.http.HttpStatus;
+
 
 import java.util.HashMap;
 import java.util.Map;
@@ -65,5 +68,31 @@ public class R extends HashMap<String, Object> {
 
 		return (Integer) this.get("code");
 	}
+
+	/**
+	 * 设置数据
+	 * @param object
+	 * @return
+	 */
+	public R setData(Object object){
+     put("data",object);
+     return  this ;
+	}
+
+	/**
+	 * 获取数据 ,利用fastJson进行逆转。
+	 * @param reference
+	 * @param <T>
+	 * @return
+	 */
+	public  <T> T getData(TypeReference<T> reference){
+      Object data = get("data") ;
+      String result = JSON.toJSONString(data) ;
+      T t = JSON.parseObject(result,reference) ;
+
+      return  t ;
+	}
+
+
 
 }
