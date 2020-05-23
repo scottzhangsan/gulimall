@@ -15,6 +15,7 @@ import com.atguigu.gulimall.order.service.OrderItemService;
 import com.atguigu.gulimall.order.vo.*;
 import com.baomidou.mybatisplus.core.toolkit.BeanUtils;
 import com.baomidou.mybatisplus.core.toolkit.IdWorker;
+import org.apache.commons.lang.StringUtils;
 import org.aspectj.weaver.ast.Or;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -36,6 +37,7 @@ import com.atguigu.common.utils.Query;
 import com.atguigu.gulimall.order.dao.OrderDao;
 import com.atguigu.gulimall.order.entity.OrderEntity;
 import com.atguigu.gulimall.order.service.OrderService;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.request.RequestContextHolder;
 
 
@@ -94,6 +96,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
      * @return
      */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public OrderSubmitRespVo submit(OrderSubmitVo vo) {
         OrderSubmitRespVo respVo = new OrderSubmitRespVo() ;
         MemberEntityResponseVo memberVo = LoginUserInterceptor.threadLocal.get();
@@ -109,6 +112,12 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
         if (result == 0L){
            respVo.setCode(1);
         }else{
+            OrderCreateDto createDto = orderCreateDto(vo);
+            OrderEntity entity  = createDto.getOredr() ;
+            this.baseMapper.insert(entity) ; //保证订单
+            List<OrderItemEntity> items = createDto.getItems();
+            orderItemService.saveBatch(items) ;
+            // 保存完数据库需要进行库存的锁定 ， 数据 skuId, lockedNum ,skuName, orderSn
 
         }
         return respVo;
@@ -127,7 +136,8 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
         orderEntity.setMemberId(memberThreadLocal.get().getId()); //设置用户ID
         // TODO,待调用远程方法获取用户名
         orderEntity.setMemberUsername("scott");
-        //TODO, 待获取订单的总的金额，从选中的购物车中获取，需要验证金额
+        //TODO, 订单相关的金额，从订单项中计算获取，不要从页面直接获取，防止用户篡改金额。
+        // 应付总额，需要总额加上运费就可以了
         orderEntity.setTotalAmount(vo.getPayPrice());
         orderEntity.setPayAmount(vo.getPayPrice());
         orderEntity.setFreightAmount(BigDecimal.ZERO); //暂时无运费
@@ -155,35 +165,40 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
         MemberEntityResponseVo memberResponseVo = LoginUserInterceptor.threadLocal.get();
         List<OrderItemVo> items = cartFeignClient.getCheckItem(memberResponseVo.getId()); //获取选中的购物车的信息
        //保存order数据
-        this.baseMapper.insert(orderEntity) ;
-
+       // this.baseMapper.insert(orderEntity) ;
         // 组装订单item数据
-        List<OrderItemEntity> collect = items.stream().map((item) -> {
+        List<OrderItemEntity> orderItems = items.stream().map((item) -> {
             OrderItemEntity orderItemEntity = new OrderItemEntity();
             orderItemEntity.setOrderId(orderEntity.getId()); //订单id
             orderItemEntity.setOrderSn(orderEntity.getOrderSn());
-            R r = productFeignClient.getSkuInfoById(item.getSkuId());
-
-            SkuInfoVo skuInfo = r.getData(new TypeReference<SkuInfoVo>() {
-            });
-            //设置sku属性
-            orderItemEntity.setSkuId(item.getSkuId());
-            orderItemEntity.setSkuName(skuInfo.getSkuName());
-            // TODO,待获取
-            orderItemEntity.setSkuAttrsVals(null);
-            orderItemEntity.setSkuPrice(skuInfo.getPrice());
-            orderItemEntity.setSkuQuantity(item.getCount());
-            // TODO, spu的相关信息待获取
-            orderItemEntity.setSpuId(11L);
-            orderItemEntity.setSpuBrand("华为");
-            orderItemEntity.setSpuName("华为");
-            orderItemEntity.setSpuPic("11");
-            orderItemEntity.setCategoryId(225L);
-
+            orderItemEntity =createOrderItem(item, orderItemEntity);
             return orderItemEntity;
         }).collect(Collectors.toList());
-        orderItemService.saveBatch(collect) ;
+        //orderItemService.saveBatch(orderItems) ;
+         // TODO ,验证各种价格
         return  createDto ;
+    }
+
+    /**
+     * 创建订单项
+     * @param item
+     * @param orderItemEntity
+     * @return
+     */
+    private OrderItemEntity createOrderItem(OrderItemVo item, OrderItemEntity orderItemEntity) {
+        orderItemEntity.setSkuId(item.getSkuId());
+        orderItemEntity.setSkuName(item.getTitle());
+        orderItemEntity.setSkuAttrsVals(StringUtils.join(item.getSkuAttr(),";"));
+        orderItemEntity.setSkuPrice(item.getPrice());
+        orderItemEntity.setSkuQuantity(item.getCount());
+        // TODO, spu的相关信息待获取
+        orderItemEntity.setSpuId(11L);
+        orderItemEntity.setSpuBrand("华为");
+        orderItemEntity.setSpuName("华为");
+        orderItemEntity.setSpuPic("11");
+        orderItemEntity.setCategoryId(225L);
+        orderItemEntity.setRealAmount(item.getPrice()); //订单真正的金额
+        return orderItemEntity ;
     }
 
 }

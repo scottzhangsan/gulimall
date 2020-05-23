@@ -2,6 +2,8 @@ package com.atguigu.gulimall.ware.service.impl;
 
 import com.atguigu.common.utils.R;
 import com.atguigu.gulimall.ware.feign.ProductFeignService;
+import com.atguigu.gulimall.ware.vo.OrderItemVo;
+import com.atguigu.gulimall.ware.vo.WareLockedVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -16,6 +18,8 @@ import com.atguigu.common.utils.Query;
 import com.atguigu.gulimall.ware.dao.WareSkuDao;
 import com.atguigu.gulimall.ware.entity.WareSkuEntity;
 import com.atguigu.gulimall.ware.service.WareSkuService;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 
@@ -27,6 +31,8 @@ public class WareSkuServiceImpl extends ServiceImpl<WareSkuDao, WareSkuEntity> i
 
     @Autowired
     ProductFeignService productFeignService;
+
+
 
     @Override
     public PageUtils queryPage(Map<String, Object> params) {
@@ -78,12 +84,44 @@ public class WareSkuServiceImpl extends ServiceImpl<WareSkuDao, WareSkuEntity> i
 
             }
 
-
             wareSkuDao.insert(skuEntity);
         }else{
             wareSkuDao.addStock(skuId,wareId,skuNum);
         }
 
+    }
+
+    @Override
+    @Transactional
+    public boolean locked(WareLockedVo lockedVo) {
+        List<OrderItemVo> items = lockedVo.getItems();
+        //
+        boolean allLockedFlag = true ; //默认所有skuID都可以锁定库存成功
+        for (OrderItemVo item:items) {
+            boolean singleLockedFlag = false ; // 默认单个没有被锁定
+            Long skuId = item.getSkuId() ;
+            Integer num = item.getNum() ;
+            //根据skuID查询有哪些仓库可以进行锁库存的操作
+            List<WareSkuEntity> wares = this.baseMapper.selectList(new QueryWrapper<WareSkuEntity>().eq("sku_id", skuId));
+            if(!CollectionUtils.isEmpty(wares)){
+                for (WareSkuEntity entity:wares) {
+                   //开始锁定库存
+                    Integer result = this.baseMapper.lockStock(item.getSkuId(),item.getNum()) ;
+                    //单个锁定成功
+                    if (result >0){
+                        singleLockedFlag = true;
+                        break;
+                    }
+                    //如果循环结束，singleLockeFlag 没变就表示库存没有锁定成功
+                }
+            }else{
+              allLockedFlag = false ;
+            }
+            if (singleLockedFlag){
+                allLockedFlag = false;
+            }
+        }
+        return allLockedFlag;
     }
 
 }
