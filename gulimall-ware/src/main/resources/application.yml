@@ -14,7 +14,23 @@ spring:
         server-addr: 127.0.0.1:8848
   application:
     name: gulimall-ware
-
+  rabbitmq:
+    host: 150.158.106.207
+    virtual-host: /
+    username: guest
+    password: guest
+    #开启发送端的确认
+    publisher-confirms: true
+    # 开启发送端消息抵达确认
+    publisher-returns: true
+    # 只要消息抵达以异步的方式进行回调
+    template:
+      mandatory: true
+    # 手动确认ack消息
+    listener:
+      direct:
+        acknowledge-mode: manual
+    port: 5672
   jackson:
     date-format: yyyy-MM-dd HH:mm:ss
 

@@ -10,6 +10,7 @@ import com.atguigu.gulimall.order.entity.OrderItemEntity;
 import com.atguigu.gulimall.order.feign.CartFeignClient;
 import com.atguigu.gulimall.order.feign.MemberFeignClient;
 import com.atguigu.gulimall.order.feign.ProductFeignClient;
+import com.atguigu.gulimall.order.feign.WareFeignClient;
 import com.atguigu.gulimall.order.intecerptor.LoginUserInterceptor;
 import com.atguigu.gulimall.order.service.OrderItemService;
 import com.atguigu.gulimall.order.vo.*;
@@ -56,6 +57,8 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
     private ProductFeignClient productFeignClient ;
     @Autowired
     private OrderItemService orderItemService ;
+   @Autowired
+    private WareFeignClient wareFeignClient ;
 
     @Override
     public PageUtils queryPage(Map<String, Object> params) {
@@ -118,9 +121,24 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
             List<OrderItemEntity> items = createDto.getItems();
             orderItemService.saveBatch(items) ;
             // 保存完数据库需要进行库存的锁定 ， 数据 skuId, lockedNum ,skuName, orderSn
+            WareLockedVo  lockedVo = new WareLockedVo() ;
+            lockedVo.setOrderSn(createDto.getOredr().getOrderSn());
+            lockedVo.setAddress(1L);
+            lockedVo.setItems(cartFeignClient.getCheckItem(memberVo.getId()));
+            R r = wareFeignClient.lockedSku(lockedVo);
+            if (r.getCode() !=0){
+                throw  new RuntimeException("锁定库存失败");
+            }
+            respVo.setCode(0); //创建订单成功
+            respVo.setOrderEntity(entity); //返回给前台相关订单信息
 
         }
         return respVo;
+    }
+
+    @Override
+    public OrderEntity getOrderEntityByOrderSn(String orderSn) {
+        return this.baseMapper.selectOne(new QueryWrapper<OrderEntity>().eq("order_sn",orderSn));
     }
 
     /**

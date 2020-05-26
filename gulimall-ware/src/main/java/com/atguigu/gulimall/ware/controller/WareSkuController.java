@@ -82,11 +82,12 @@ public class WareSkuController {
 
         return R.ok();
     }
-    @PostMapping("/lock")
+
 
     /**
      * 库存锁定
      */
+    @PostMapping("/lock")
     public R lockedSku(@RequestBody WareLockedVo lockedVo){
 
        if( wareSkuService.locked(lockedVo)){

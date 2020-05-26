@@ -28,5 +28,6 @@ public interface WareSkuService extends IService<WareSkuEntity> {
     boolean locked(WareLockedVo lockedVo) ;
 
 
+    int unlockStock(Long skuId, Long wareId, Integer skuNum);
 }
 
