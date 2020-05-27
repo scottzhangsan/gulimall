@@ -18,6 +18,7 @@ import com.baomidou.mybatisplus.core.toolkit.BeanUtils;
 import com.baomidou.mybatisplus.core.toolkit.IdWorker;
 import org.apache.commons.lang.StringUtils;
 import org.aspectj.weaver.ast.Or;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
@@ -59,6 +60,8 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
     private OrderItemService orderItemService ;
    @Autowired
     private WareFeignClient wareFeignClient ;
+   @Autowired
+   private RabbitTemplate rabbitTemplate ;
 
     @Override
     public PageUtils queryPage(Map<String, Object> params) {
@@ -131,7 +134,8 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
             }
             respVo.setCode(0); //创建订单成功
             respVo.setOrderEntity(entity); //返回给前台相关订单信息
-
+            //发送消息给相关的队列
+            rabbitTemplate.convertAndSend("order-event-exchange","order.create.order",createDto);
         }
         return respVo;
     }

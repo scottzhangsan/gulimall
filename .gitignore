@@ -23,3 +23,5 @@ buildNumber.properties
 /gulimall-common/gulimall-common.iml
 /gulimall-auth-server/gulimall-auth-server.iml
 /gulimall-third-server/gulimall-third-server.iml
+/gulimall-cart/gulimall-cart.iml
+/gulimall-search/gulimall-search.iml

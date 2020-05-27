@@ -22,6 +22,8 @@
         <module>gulimall-auth-server</module>
         <module>gulimall-third-server</module>
         <module>gulimall-cart</module>
+        <module>gulimall-gate</module>
+
     </modules>
 
 

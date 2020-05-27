@@ -26,7 +26,7 @@ public class OrderWebController {
 
     @PostMapping("submitOrder")
     public String submitOrder(OrderSubmitVo vo){
-
+        orderService.submit(vo) ;
         //如果订单提交成功，返回支付的页面
         return "pay" ;
     }

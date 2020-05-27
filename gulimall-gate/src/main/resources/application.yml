@@ -1,17 +1,17 @@
+
 spring:
+  application:
+    name: gulimall-gateway
   cloud:
+    nacos:
+      discovery:
+        server-addr: 127.0.0.1:8848
     gateway:
       routes:
-#        - id: test_route
-#          uri: https://www.baidu.com
-#          predicates:
-#            - Query=url,baidu
-#
-#        - id: qq_route
-#          uri: https://www.qq.com
-#          predicates:
-#            - Query=url,qq
-
+        - id: test_route
+          uri: https://www.baidu.com
+          predicates:
+            - Query=url,baidu
         - id: product_route
           uri: lb://gulimall-product
           predicates:
@@ -46,8 +46,12 @@ spring:
             - Path=/api/**
           filters:
             - RewritePath=/api/(?<segment>.*),/renren-fast/$\{segment}
-
-
+        - id: gulimall_host_route
+          uri: lb://gulimall-product
+          predicates:
+            - Host=**.gulimal.com
+server:
+  port: 88
 
   ## 前端项目，/api
 ## http://localhost:88/api/captcha.jpg   http://localhost:8080/renren-fast/captcha.jpg
