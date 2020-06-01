@@ -51,6 +51,21 @@ public class OrderConstant {
             return msg;
         }
 
+    }
 
+    public static class MqConstant{
+        public static  final  String ORDER_EVENT_EXCHANGE = "order-event-exchange"; //订单相关的交换机名称
+
+        public static final   String ORDER_RELEASE_KEY = "order.release.key" ; //订单释放的路由键
+
+        public static  final   int    MESSAGE_TTL = 60000 ; //消息消失时间，毫秒
+
+        public static  final  String ORDER_DELAY_QUEUE ="order.delay.queue";
+
+        public static  final  String ORDER_RELEASE_ORDER_QUEUE ="order.release.order.queue";
+
+
+
+        
     }
 }

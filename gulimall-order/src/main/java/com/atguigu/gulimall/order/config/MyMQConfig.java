@@ -1,5 +1,6 @@
 package com.atguigu.gulimall.order.config;
 
+import com.atguigu.common.constant.OrderConstant;
 import org.springframework.amqp.core.Binding;
 import org.springframework.amqp.core.Exchange;
 import org.springframework.amqp.core.Queue;
@@ -21,8 +22,8 @@ public class MyMQConfig {
     @Bean
     public Queue orderDelayQueue(){
         Map<String,Object> args = new HashMap<>();
-        args.put("x-dead-letter-exchange","order-event-exchange");
-        args.put("x-dead-letter-routing-key","order-release-key");
+        args.put("x-dead-letter-exchange", OrderConstant.MqConstant.ORDER_EVENT_EXCHANGE);
+        args.put("x-dead-letter-routing-key","order.release.key");
         args.put("x-message-ttl",60000);
         //String name, boolean durable, boolean exclusive, boolean autoDelete, Map<String, Object> arguments
         Queue queue = new Queue("order.delay.queue",true,false,false,args) ;
@@ -54,7 +55,7 @@ public class MyMQConfig {
         return  new Binding("order.release.order.queue",
                 Binding.DestinationType.QUEUE,
                 "order-event-exchange",
-                "order.release.order",
+                "order.release.key",
                 null);
     }
 }
