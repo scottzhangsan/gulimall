@@ -211,37 +211,15 @@
 									</dd>
 								</dl>
 							</div>
-<!--							<div class="box-attr-2 clear">
-								<dl>
-									<dt>选择版本</dt>
-									<dd>
-										<a href="#">标准版</a>
-									</dd>
-									<dd>
-										<a href="#">套装版</a>
-									</dd>
-								</dl>
-							</div>
 
-							<div class="box-attr-2 clear">
-								<dl>
-									<dt>选择内存</dt>
-									<dd>
-										<a href="#">64GB</a>
-									</dd>
-									<dd>
-										<a href="#">128GB</a>
-									</dd>
-								</dl>
-							</div>-->
 							<br/>
 						</div>
 
 						<div class="box-btns clear">
 							<div class="box-btns-one">
 								<form id="itemForm" action="http://cart.gmall.com:8087/addToCart" method="post">
-									<input type="text" name="num" id=""  value="1"/>
-									<input type="hidden" name="skuId"  th:value="${skuInfo?.id}" />
+									<input type="text" name="num" id="numInput"  value="1"/>
+<!--									<input type="hidden" name="skuId"  th:value="${skuInfo.id}" />-->
 
 									<div class="box-btns-one1">
 
@@ -259,14 +237,14 @@
 									</div>
 								</form>
 							</div>
-							<div id="cartBtn"  style="cursor:pointer;"  canClick="1"  onclick="addToCart(this)" class="box-btns-two">
+							<button id="cartBtn"    th:attr="skuId=${item.skuInfo.skuId}" class="box-btns-two">
 
 								放入购物车
 
-							</div>
+							</button>
 						</div>
 
-						 
+
 					</div>
 
 				</div>
@@ -396,41 +374,6 @@
 									<p>
 										<a href="#">品牌:华为（HUAWEI）</a>
 									</p>
-									<!--<table>
-										<tr>
-											<td>
-												<a href="##">商品名称：华为Mate 10</a>
-											</td>
-											<td>
-												<a href="##">商品毛重：0.58kg</a>
-											</td>
-											<td>
-												<a href="##">商品编号：5544038</a>
-											</td>
-											<td>
-												<a href="##">商品产地：中国大陆</a>
-											</td>
-										</tr>
-										<tr>
-											<td>
-												<a href="##">系统：安卓（Android）</a>
-											</td>
-											<td>
-												<a href="##">前置摄像头像素：800万-1599万</a>
-											</td>
-											<td>
-												<a href="##">后置摄像头像素：2000万及以上，1200万-1999万</a>
-											</td>
-											<td>
-												<a href="##">机身内存：128GB</a>
-											</td>
-										</tr>
-										<tr>
-											<td colspan="4">
-												<a href="##">全面屏，双卡双待，指纹识别，Type-C，VoLTE，2K屏，拍照神器，支持NFC，商务手机，安全手机，分辨率10</a>
-											</td>
-										</tr>
-									</table>-->
 									<img class="xiaoguo" th:src="${value}" th:each="value:${#strings.listSplit(item.desc.decript,',')}"/>
 									<div class="guiGebox guiGebox1">
 										<div class="guiGe">
@@ -759,9 +702,13 @@
 		</div>
 	</body>
 
-	<script src="./js/jquery1.9.js" type="text/javascript" charset="utf-8"></script>
-	<script src="./js/js.js" type="text/javascript" charset="utf-8"></script>
+	<script src="/static/item/js/jquery1.9.js" type="text/javascript" charset="utf-8"></script>
+	<script src="/static/item/js/js.js" type="text/javascript" charset="utf-8"></script>
 	<script type="text/javascript">
+
+		//绑定单击事件
+
+
         function addToCart(obj){
             var canClick = $(obj).attr("canClick");
             if(canClick=='0'){
@@ -802,6 +749,13 @@
                 $("#cartBtn").attr("class","box-btns-two-off");
             }
         }
+
+		$("#cartBtn").click(function(){
+			var num = $("#numInput").val() ;
+			var skuId= $(this).attr("skuId") ;
+			location.href="http://cart.gulimal.com/addCart?skuId="+skuId+"&num="+num ;
+			return false ;
+		}) ;
 	</script>
 
 </html>

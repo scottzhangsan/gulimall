@@ -4,6 +4,7 @@ import com.atguigu.common.constant.AuthServerConstant;
 import com.atguigu.common.constant.CartConstant;
 import com.atguigu.common.vo.MemberEntityResponseVo;
 import com.atguigu.gulimall.cart.vo.UserInfoTo;
+import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -12,7 +13,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.util.UUID;
-
+@Component
 public class CartInterceptor implements HandlerInterceptor {
 
     public static ThreadLocal<UserInfoTo> threadLocal = new ThreadLocal<>() ;
@@ -72,9 +73,10 @@ public class CartInterceptor implements HandlerInterceptor {
             }
         }
         if (!flag){
+            //如果没有user_key的cookie，设置相应的user_cookie
             Cookie cookie = new Cookie(CartConstant.TEMP_USER_COOKIE_NAME,userInfoTo.getUserKey());
-            cookie.setDomain("localhost");
-            cookie.setMaxAge(60*60*24*30);
+            cookie.setDomain("gulimal.com");
+            cookie.setMaxAge(60*60*24*30); //一个月
             response.addCookie(cookie);
         }
 

@@ -22,11 +22,12 @@
 
         </ul>
 
+
+              <a th:if="${session.loginUser==null}" href="http://auth.gulimal.com/login.html">你好，请登录</a><span th:if="${session.loginUser!=null}">你好:[[${session.loginUser.nickname}]]</span>
+
         <ul class="hd_wrap_right">
-        <li class="forel">
-        <a href="/javascript:;" class="link_login">你好,请登录</a>&nbsp;
-    <a href="/javascript:;" class="link_regist">免费注册</a>
-        </li>
+
+        <li><a href="/javascript:;" class="link_regist">免费注册</a></li>
         <li class="spacer"></li>
         <li>
         <a href="/javascript:;">我的订单</a>

@@ -1,8 +1,11 @@
 package com.atguigu.gulimall.cart.controller;
 
 import com.atguigu.common.utils.R;
+import com.atguigu.gulimall.cart.interceptor.CartInterceptor;
 import com.atguigu.gulimall.cart.service.CartService;
+import com.atguigu.gulimall.cart.vo.Cart;
 import com.atguigu.gulimall.cart.vo.CartItem;
+import com.atguigu.gulimall.cart.vo.UserInfoTo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -18,6 +21,24 @@ public class CartController {
 
     @Autowired
     private CartService cartService ;
+    //@Autowired
+    //private CartInterceptor cartInterceptor ;
+
+
+    /**
+     * 获取用户的购物车信息
+     * @return
+     */
+    @GetMapping("/cart.html")
+    public String getUserCartList( Model model){
+        UserInfoTo userInfoTo = CartInterceptor.threadLocal.get();
+        System.out.println(userInfoTo);
+        Cart cartItem = cartService.getCart();
+        model.addAttribute("itemList",cartItem) ;
+        return "cartList" ;
+    }
+
+
 
 
     @GetMapping("/addCart")

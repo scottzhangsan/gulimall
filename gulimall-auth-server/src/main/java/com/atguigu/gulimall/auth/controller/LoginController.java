@@ -86,7 +86,7 @@ public class LoginController {
             //成功
             String jsonStr = (String) result.get("result");
             MemberEntityResponseVo responseVo = JSON.parseObject(jsonStr,MemberEntityResponseVo.class);
-            session.setAttribute("loginUser",responseVo);
+            session.setAttribute(AuthServerConstant.LOGIN_USER,responseVo);
             return "redirect:http://gulimal.com" ;
         }else{
             return "redirect:http://auth.gulimal.com/login.html" ;

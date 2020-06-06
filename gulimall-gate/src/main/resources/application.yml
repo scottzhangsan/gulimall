@@ -58,6 +58,10 @@ spring:
           uri: lb://gulimall-auth-server
           predicates:
             - Host=auth.gulimal.com
+        - id: gulimall_cart_route
+          uri: lb://gulimall-cart
+          predicates:
+            - Host=cart.gulimal.com
 server:
   port: 88
 
