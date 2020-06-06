@@ -122,7 +122,7 @@ public class MemberController {
       if (entity == null){
        return R.error(BizCodeEnume.LOGIN_ERROR_EXCEPTION.getCode(),BizCodeEnume.LOGIN_ERROR_EXCEPTION.getMsg());
       }
-      return  R.ok() ;
+      return  R.ok().put("result",JSON.toJSONString(entity)) ;
     }
 
 

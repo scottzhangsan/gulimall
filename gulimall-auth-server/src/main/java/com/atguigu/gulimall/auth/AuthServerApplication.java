@@ -7,6 +7,9 @@ import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.session.data.redis.config.annotation.web.http.EnableRedisHttpSession;
 
+/**
+ * 使用spring-session使服务共享session数据
+ */
 @EnableRedisHttpSession
 @EnableFeignClients(basePackages = "com.atguigu.gulimall.auth.feign")
 @SpringBootApplication

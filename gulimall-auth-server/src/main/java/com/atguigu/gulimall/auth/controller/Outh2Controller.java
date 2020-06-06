@@ -6,11 +6,15 @@ import com.atguigu.common.vo.MemberEntityResponseVo;
 import com.atguigu.gulimall.auth.dto.AccessTokenResponseDto;
 import com.atguigu.gulimall.auth.feign.MemberFeignService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.http.HttpResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.client.RestTemplate;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 /*
@@ -34,31 +38,30 @@ public class Outh2Controller {
     private String redirect_uri = "http://scott.nat300.top/outh2.0/weibo/success";
 
     @GetMapping("/outh2.0/weibo/success")
-    public String weibo(@RequestParam("code") String code, HttpSession session) {
+    public String weibo(@RequestParam("code") String code, HttpSession session, HttpServletResponse response, HttpServletRequest request) {
         try {
             AccessTokenResponseDto accessTokenResponseDto = restTemplate.postForObject("https://api.weibo.com/oauth2/access_token?client_id=" + client_id + "&client_secret=" + client_secret + "&grant_type=" + grant_type + "&code=" + code + "&redirect_uri=" + redirect_uri,
                     null, AccessTokenResponseDto.class);
             System.out.println(accessTokenResponseDto);
             //ouath2.0登录成功后，如果用户从来没在系统中登录过把相关的信息保存到数据库中
             R r = memberFeignService.oauthLogin(accessTokenResponseDto);
-
             if (r.getCode() == 0) {
-             String result = (String) r.get("result");
+                String result = (String) r.get("result");
                 MemberEntityResponseVo responseVo = JSON.parseObject(result, MemberEntityResponseVo.class);
-                session.setAttribute("user",responseVo) ;
+                session.setAttribute("loginUser",responseVo) ;
             }
-            //TODO,这些最后都应该用域名替代，登录成功，应该实际跳转到首页
-            return "redirect:http://localhost:20000/login.html";
+           return "redirect:http://gulimal.com";
         } catch (Exception e) {
             log.error("微博登录失败：", e);
-            return "redirect:http://localhost:20000/login.html";
+            return "redirect:http://auth.gulimal.com/login.html";
         }
     }
-
-    @GetMapping("/test")
-    public String checkoutSession(HttpSession session){
-        session.setAttribute("demo","demo");
-        return "login" ;
+    @GetMapping("/test.html")
+    public  String test(HttpSession session){
+        Object loginUser = session.getAttribute("loginUser");
+        session.setAttribute("test","test");
+        return "redirect:http://gulimal.com";
     }
+
 
 }

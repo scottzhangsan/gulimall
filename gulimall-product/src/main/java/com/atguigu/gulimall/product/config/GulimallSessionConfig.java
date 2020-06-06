@@ -1,4 +1,4 @@
-package com.atguigu.gulimall.auth.config;
+package com.atguigu.gulimall.product.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -20,7 +20,6 @@ public class GulimallSessionConfig {
 
     @Bean
     public RedisSerializer createRedisSerializer(){
-
-        return new  GenericJackson2JsonRedisSerializer() ;   //设置redis序列化
+       return new  GenericJackson2JsonRedisSerializer() ;   //设置redis序列化
     }
 }

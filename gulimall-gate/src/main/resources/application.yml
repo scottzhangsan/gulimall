@@ -49,11 +49,15 @@ spring:
         - id: gulimall_host_route
           uri: lb://gulimall-product
           predicates:
-            - Host=gulimal.com
+            - Host=gulimal.com,item.gulimal.com   # host为 gulimall.com ,item.gulimall.com都转发到gulimall-product服务
         - id: gulimall_search_route
           uri: lb://gulimall-search
           predicates:
             - Host=search.gulimal.com
+        - id: gulimall_auth_route
+          uri: lb://gulimall-auth-server
+          predicates:
+            - Host=auth.gulimal.com
 server:
   port: 88
 

@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.atguigu.common.constant.AuthServerConstant;
 import com.atguigu.common.exception.BizCodeEnume;
 import com.atguigu.common.utils.R;
+import com.atguigu.common.vo.MemberEntityResponseVo;
 import com.atguigu.gulimall.auth.feign.MemberFeignService;
 import com.atguigu.gulimall.auth.feign.ThirdServerFeignService;
 import com.atguigu.gulimall.auth.vo.UserLoginVo;
@@ -19,6 +20,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 import java.util.HashMap;
 import java.util.List;
@@ -69,22 +71,25 @@ public class LoginController {
                 errors.put(error.getField(),error.getDefaultMessage()) ;
             }
             attributes.addFlashAttribute("errors",errors) ;
-           return "redirect:http://localhost:20000/reg.html" ;
+           return "redirect:http://auth.gulimal.com/reg.html" ;
          }
 
         // TODO,校验通过调用接口保存注册的数据
         memberFeignService.register(vo) ;
-        return "redirect:http://localhost:20000/login.html" ;
+        return "redirect:http://auth.gulimal.com/login.html" ;
     }
 
     @PostMapping("/login")
-    public String login(UserLoginVo loginVo){
+    public String login(UserLoginVo loginVo, HttpSession session){
         R result = memberFeignService.login(loginVo) ;
         if (result.getCode() == 0){
             //成功
-            return "success" ;
+            String jsonStr = (String) result.get("result");
+            MemberEntityResponseVo responseVo = JSON.parseObject(jsonStr,MemberEntityResponseVo.class);
+            session.setAttribute("loginUser",responseVo);
+            return "redirect:http://gulimal.com" ;
         }else{
-            return "redirect:http://localhost:20000/login.html" ;
+            return "redirect:http://auth.gulimal.com/login.html" ;
         }
 
     }
