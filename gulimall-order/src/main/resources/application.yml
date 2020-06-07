@@ -1,5 +1,5 @@
 server:
-  port: 9000
+  port: 9006
 spring:
   datasource:
     username: root
@@ -37,6 +37,8 @@ spring:
     port: 6379
     session:
       store-type: redis
+  thymeleaf:
+    cache: false
 mybatis-plus:
   mapper-locations: classpath:/mapper/**/*.xml
   global-config:

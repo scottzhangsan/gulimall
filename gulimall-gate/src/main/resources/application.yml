@@ -63,9 +63,9 @@ spring:
           predicates:
             - Host=cart.gulimal.com
         - id: gulimall_order_route
-            uri: lb://gulimall-order
-            predicates:
-              - Host=order.gulimal.com
+          uri: lb://gulimall-order
+          predicates:
+            - Host=order.gulimal.com
 server:
   port: 88
 
