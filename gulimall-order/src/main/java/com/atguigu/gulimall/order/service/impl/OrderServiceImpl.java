@@ -77,7 +77,6 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
     public OrderConfirmVo confirm() {
         // 如果下面的代码要用异步的方式来执行， RequestContextHolder.getRequestAttributes() ;就无法共享，需要在后面
         //的多线程的地方进行重新设置RequestContextHolder.getRequestAttributes()
-
         OrderConfirmVo confirmVo = new OrderConfirmVo() ;
         MemberEntityResponseVo memberResponseVo = LoginUserInterceptor.threadLocal.get();
         List<MemberAddressVo> addresss = memberFeignClient.getMemberAddrsss(memberResponseVo.getId()) ;

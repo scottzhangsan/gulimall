@@ -25,7 +25,7 @@ public class LoginUserInterceptor implements HandlerInterceptor {
        // 直接返回登录的页面
         request.getSession().setAttribute("errorMsg","还未登录，请先登录");
        //TODO,地址待配置
-        response.sendRedirect("http://localhost:9002/login.html");
+        response.sendRedirect("http://auth.gulimal/login.html");
         return false;
     }
 }

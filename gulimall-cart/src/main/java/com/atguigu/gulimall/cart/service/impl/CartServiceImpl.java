@@ -129,7 +129,7 @@ public class CartServiceImpl implements CartService {
         String key = CartConstant.USER_CART_PREFIX+memberId;
         BoundHashOperations<String, Object, Object> boundHashOperations = redisTemplate.boundHashOps(key);
         //保存的是Json类型的字符串
-        List<Object> values = boundHashOperations.values();
+        List<Object> values = boundHashOperations.values();  //需要实时根据商品的的skuid获取商品的价格
         if (CollectionUtils.isNotEmpty(values)){
             List<CartItem> items = values.stream().map((result)->{
                 CartItem cartItem  =JSON.parseObject(result.toString(),CartItem.class) ;

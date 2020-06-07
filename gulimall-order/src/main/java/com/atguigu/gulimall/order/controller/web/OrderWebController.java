@@ -18,7 +18,7 @@ public class OrderWebController {
      * @param model
      * @return
      */
-    @GetMapping("/confirmOrder")
+    @GetMapping("/toTrade")
     public String  confirmOrder(Model model){
         model.addAttribute("result",orderService.confirm());
         return "confirm" ;
@@ -29,6 +29,12 @@ public class OrderWebController {
         orderService.submit(vo) ;
         //如果订单提交成功，返回支付的页面
         return "pay" ;
+    }
+
+    @GetMapping("/toTrade11")
+    public String toTrade(){
+
+        return "confirm" ;
     }
 
 
