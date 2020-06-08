@@ -626,7 +626,13 @@
     <p class="yfze_a"><span class="z">应付总额：</span><span class="hq" th:text="${result.payPrice}">￥28.90</span></p>
     <p class="yfze_b">寄送至： 北京 朝阳区 三环到四环之间 朝阳北路复兴国际大厦23层麦田房产 IT-中心研发二部 收货人：赵存权 188****5052</p>
   </div>
-  <button class="tijiao">提交订单</button>
+  <form action="http://order.gulimal.com/submitOrder" method="post">
+    <input type="hidden" id="addrId" value="1" name="addrId" />
+    <input type="hidden" id="orderPrice" name="payPrice" th:value="${result.payPrice}">
+    <input type="hidden" id="orderToken" name="orderToken" th:value="${result.orderToken}">
+    <button class="tijiao" type="submit">提交订单</button>
+  </form>
+
 </div>
 </div>
 

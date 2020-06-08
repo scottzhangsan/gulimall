@@ -10,7 +10,7 @@ import java.math.BigDecimal;
 @Data
 public class OrderSubmitVo {
      private Long addrId ; //用户的收货地址id.
-     private Integer payType ;   //支付的方式
+     private Integer payType =1 ;   //支付的方式
      //无须提交购买的商品，去购物车在取一遍
      private  String orderToken ; //防重的令牌
 

@@ -23,7 +23,7 @@ public class GulimallOrderApplicationTests {
 
     @Test
     public void test01(){
-        DirectExchange exchange = new DirectExchange("test-exchange",true,false,null);
+        DirectExchange exchange = new DirectExchange("test-exchange1",true,false,null);
         amqpAdmin.declareExchange(exchange);
     }
 

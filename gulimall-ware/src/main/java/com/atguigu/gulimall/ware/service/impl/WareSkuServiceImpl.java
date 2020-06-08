@@ -115,13 +115,13 @@ public class WareSkuServiceImpl extends ServiceImpl<WareSkuDao, WareSkuEntity> i
         for (OrderItemVo item:items) {
             boolean singleLockedFlag = false ; // 默认单个没有被锁定
             Long skuId = item.getSkuId() ;
-            Integer num = item.getNum() ;
+            Integer num = item.getCount() ;
             //根据skuID查询有哪些仓库可以进行锁库存的操作
             List<WareSkuEntity> wares = this.baseMapper.selectList(new QueryWrapper<WareSkuEntity>().eq("sku_id", skuId));
             if(!CollectionUtils.isEmpty(wares)){
                 for (WareSkuEntity entity:wares) {
                    //开始锁定库存
-                    Integer result = this.baseMapper.lockStock(item.getSkuId(),item.getNum()) ;
+                    Integer result = this.baseMapper.lockStock(item.getSkuId(),item.getCount()) ;
                     //单个锁定成功
                     if (result >0){
                         //库存详情锁定成功，保存详情的信息
@@ -130,7 +130,7 @@ public class WareSkuServiceImpl extends ServiceImpl<WareSkuDao, WareSkuEntity> i
                         detailEntity.setLockStatus(1);
                         detailEntity.setSkuId(item.getSkuId());
                         detailEntity.setSkuName("test");
-                        detailEntity.setSkuNum(item.getNum());
+                        detailEntity.setSkuNum(item.getCount());
                         detailEntity.setTaskId(orderTaskEntity.getId());
                         detailEntity.setWareId(entity.getWareId());
                         taskDetailService.save(detailEntity) ;
@@ -139,6 +139,7 @@ public class WareSkuServiceImpl extends ServiceImpl<WareSkuDao, WareSkuEntity> i
                         BeanUtils.copyProperties(detailEntity,detailTo);
                         lockedTo.setTaskId(orderTaskEntity.getId());
                         lockedTo.setDetail(detailTo);
+                        singleLockedFlag =true ;
                         //发送消息 ，使用的交换机，使用的路由键，发送的内容
                         rabbitTemplate.convertAndSend("stock-event-exchange","stock.locked",lockedTo);
                         break;
@@ -148,7 +149,7 @@ public class WareSkuServiceImpl extends ServiceImpl<WareSkuDao, WareSkuEntity> i
             }else{
               allLockedFlag = false ;
             }
-            if (singleLockedFlag){
+            if (!singleLockedFlag){
                 allLockedFlag = false;
             }
         }

@@ -121,6 +121,9 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
             OrderEntity entity  = createDto.getOredr() ;
             this.baseMapper.insert(entity) ; //保证订单
             List<OrderItemEntity> items = createDto.getItems();
+            for (OrderItemEntity itemEntity: items) {
+                itemEntity.setOrderId(entity.getId());
+            }
             orderItemService.saveBatch(items) ;
             // 保存完数据库需要进行库存的锁定 ， 数据 skuId, lockedNum ,skuName, orderSn
             WareLockedVo  lockedVo = new WareLockedVo() ;
@@ -184,9 +187,9 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
         orderEntity.setUseIntegration(0); //下单时使用积分为0
         createDto.setOredr(orderEntity);
         MemberEntityResponseVo memberResponseVo = LoginUserInterceptor.threadLocal.get();
+        //本次再次的调用最终确定商品的价格
         List<OrderItemVo> items = cartFeignClient.getCheckItem(memberResponseVo.getId()); //获取选中的购物车的信息
        //保存order数据
-       // this.baseMapper.insert(orderEntity) ;
         // 组装订单item数据
         List<OrderItemEntity> orderItems = items.stream().map((item) -> {
             OrderItemEntity orderItemEntity = new OrderItemEntity();
@@ -195,8 +198,9 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
             orderItemEntity =createOrderItem(item, orderItemEntity);
             return orderItemEntity;
         }).collect(Collectors.toList());
-        //orderItemService.saveBatch(orderItems) ;
+
          // TODO ,验证各种价格
+        createDto.setItems(orderItems);
         return  createDto ;
     }
 
