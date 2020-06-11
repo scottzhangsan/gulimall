@@ -35,5 +35,7 @@ public interface OrderService extends IService<OrderEntity> {
 
     OrderEntity getOrderEntityByOrderSn(String orderSn);
 
+    int cancelOrder(OrderEntity orderEntity);
+
 }
 

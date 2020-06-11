@@ -105,6 +105,11 @@ public class WareSkuServiceImpl extends ServiceImpl<WareSkuDao, WareSkuEntity> i
 
     @Override
     @Transactional(rollbackFor = Exception.class)
+    /**
+     * 库存解锁的场景
+     * 1：下订单成功，订单过期没有被支付系统，被用户收到取消的都要解锁库存
+     * 2：下订单成功，库存锁定成功，其他后面的应用调用异常，也进行解锁库存
+     */
     public boolean locked(WareLockedVo lockedVo) {
         List<OrderItemVo> items = lockedVo.getItems();
         //添加库存工作单的记录

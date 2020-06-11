@@ -15,4 +15,6 @@ public interface CartService {
 
     List<CartItem> getCartItemsByMemberId(Long memberId) ;
 
+    void deleteCartItem(Long memberId); //删除购物车的数据
+
 }

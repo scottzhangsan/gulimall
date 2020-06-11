@@ -48,7 +48,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
     @Autowired
     private MemberFeignClient memberFeignClient ;
     @Autowired
-    private CartFeignClient cartFeignClient ;
+    private CartFeignClient cartFeignClient ; // feign在调用的时候可能会丢失请求头
     @Autowired
     private StringRedisTemplate stringRedisTemplate ;
 
@@ -62,6 +62,8 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
     private WareFeignClient wareFeignClient ;
    @Autowired
    private RabbitTemplate rabbitTemplate ;
+   @Autowired
+   private StringRedisTemplate redisTemplate ;
 
     @Override
     public PageUtils queryPage(Map<String, Object> params) {
@@ -103,6 +105,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
     @Override
     @Transactional(rollbackFor = Exception.class)
     public OrderSubmitRespVo submit(OrderSubmitVo vo) {
+
         OrderSubmitRespVo respVo = new OrderSubmitRespVo() ;
         MemberEntityResponseVo memberVo = LoginUserInterceptor.threadLocal.get();
         memberThreadLocal.set(memberVo);
@@ -134,6 +137,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
             if (r.getCode() !=0){
                 throw  new RuntimeException("锁定库存失败");
             }
+            //订单创建成功，删除购物车
             respVo.setCode(0); //创建订单成功
             respVo.setOrderEntity(entity); //返回给前台相关订单信息
             //发送消息给相关的队列
@@ -145,6 +149,11 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
     @Override
     public OrderEntity getOrderEntityByOrderSn(String orderSn) {
         return this.baseMapper.selectOne(new QueryWrapper<OrderEntity>().eq("order_sn",orderSn));
+    }
+
+    @Override
+    public int cancelOrder(OrderEntity orderEntity) {
+        return this.baseMapper.updateById(orderEntity);
     }
 
     /**

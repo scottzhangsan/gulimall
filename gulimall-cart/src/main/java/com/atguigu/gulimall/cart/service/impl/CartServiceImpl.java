@@ -141,6 +141,12 @@ public class CartServiceImpl implements CartService {
         return  null ;
     }
 
+    @Override
+    public void deleteCartItem(Long memberId) {
+        String cartKey =  CartConstant.USER_CART_PREFIX+memberId ;
+        redisTemplate.delete(cartKey) ;
+    }
+
     /**
      *
      * @param values1 获取购物车的详情数据
