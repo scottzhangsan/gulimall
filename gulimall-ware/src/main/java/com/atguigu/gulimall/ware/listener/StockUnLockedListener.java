@@ -50,16 +50,20 @@ public class StockUnLockedListener {
             Long taskId = lockedTo.getTaskId() ;
             //获取订单号
             try{
-                String orderSn = wareOrderTaskService.getById(taskId).getOrderSn() ;
+
+                WareOrderTaskEntity byId = wareOrderTaskService.getById(taskId);
+                String orderSn = byId.getOrderSn()  ;
                 //根据订单号查询订单的状态，只有是状态已取消的状态才能取消
                 String orderStatus = orderFeignService.getOrderStatus(orderSn) ;
                 //订单被取消的状态或者订单不存在
-                if (StringUtils.isEmpty(orderStatus) || Integer.valueOf(orderStatus)== OrderConstant.OrderStatus.CANCLED.getCode()){
+                if (StringUtils.isEmpty(orderStatus) || Integer.valueOf(orderStatus)== OrderConstant.OrderStatus.CANCLED.getCode() || lockedDetailTo.getLockStatus() !=1){
                     //解锁订单  skuid , wareId, lockedNum , detailId
                     //需要采用自动ack的机制
-                    // TODO,当前库存工作单详情的状态只有是已锁定才能进行解锁
                     wareSkuService.unlockStock(lockedDetailTo.getSkuId(),lockedDetailTo.getWareId(),lockedDetailTo.getSkuNum()) ;
-
+                    WareOrderTaskDetailEntity detailEntity = new WareOrderTaskDetailEntity() ;
+                    detailEntity.setId(lockedDetailTo.getId());
+                    detailEntity.setLockStatus(2);
+                    wareOrderTaskDetailService.updateById(detailEntity) ;
                     // 告诉rabbitMq解锁成功
                     channel.basicAck(message.getMessageProperties().getDeliveryTag(),false);
                 }else{
@@ -84,12 +88,18 @@ public class StockUnLockedListener {
         try{
             if (orderTo!=null && OrderConstant.OrderStatus.CANCLED.getCode() == orderTo.getStatus()){
                 WareOrderTaskEntity orderTaskEntity = wareOrderTaskService.getwareOrderTaskByOrderSn(orderTo.getOrderSn());
+                //必须是没有解锁的库存再进行解锁。
                 List<WareOrderTaskDetailEntity> wareOrderTaskDetailEntities = wareOrderTaskDetailService.listWareOrderTaskDetailByTaskId(orderTaskEntity.getId());
                 for (WareOrderTaskDetailEntity detailEntity:wareOrderTaskDetailEntities) {
                     Long skuId = detailEntity.getSkuId();
                     Long wareId = detailEntity.getWareId();
                     Integer num = detailEntity.getSkuNum();
                     wareSkuService.unlockStock(skuId, wareId, num);
+                    //更改库存解锁单的状态
+                    WareOrderTaskDetailEntity entity = new WareOrderTaskDetailEntity() ;
+                    entity.setId(detailEntity.getId());
+                    entity.setLockStatus(2);//已解锁
+                    wareOrderTaskDetailService.updateById(entity);
                 }
             }
             channel.basicAck(message.getMessageProperties().getDeliveryTag(),false);

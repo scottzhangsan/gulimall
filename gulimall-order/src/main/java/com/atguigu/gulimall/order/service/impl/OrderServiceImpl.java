@@ -17,7 +17,7 @@ import com.atguigu.gulimall.order.vo.*;
 import com.baomidou.mybatisplus.core.toolkit.BeanUtils;
 import com.baomidou.mybatisplus.core.toolkit.IdWorker;
 import org.apache.commons.lang.StringUtils;
-import org.aspectj.weaver.ast.Or;
+
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -51,9 +51,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
     private CartFeignClient cartFeignClient ; // feign在调用的时候可能会丢失请求头
     @Autowired
     private StringRedisTemplate stringRedisTemplate ;
-
     public static ThreadLocal<MemberEntityResponseVo> memberThreadLocal = new ThreadLocal<>() ;
-
     @Autowired
     private ProductFeignClient productFeignClient ;
     @Autowired
@@ -105,7 +103,6 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
     @Override
     @Transactional(rollbackFor = Exception.class)
     public OrderSubmitRespVo submit(OrderSubmitVo vo) {
-
         OrderSubmitRespVo respVo = new OrderSubmitRespVo() ;
         MemberEntityResponseVo memberVo = LoginUserInterceptor.threadLocal.get();
         memberThreadLocal.set(memberVo);

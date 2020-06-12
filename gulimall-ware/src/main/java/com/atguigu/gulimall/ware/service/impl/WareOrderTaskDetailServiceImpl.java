@@ -30,7 +30,7 @@ public class WareOrderTaskDetailServiceImpl extends ServiceImpl<WareOrderTaskDet
 
     @Override
     public List<WareOrderTaskDetailEntity> listWareOrderTaskDetailByTaskId(Long taskId) {
-        return this.baseMapper.selectList(new QueryWrapper<WareOrderTaskDetailEntity>().eq("task_id",taskId));
+        return this.baseMapper.selectList(new QueryWrapper<WareOrderTaskDetailEntity>().eq("task_id",taskId).eq("lock_status",1));
     }
 
 }
