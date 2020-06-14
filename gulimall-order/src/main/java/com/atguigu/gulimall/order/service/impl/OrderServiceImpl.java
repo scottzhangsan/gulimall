@@ -7,12 +7,14 @@ import com.atguigu.common.utils.R;
 import com.atguigu.common.vo.MemberEntityResponseVo;
 import com.atguigu.gulimall.order.dto.OrderCreateDto;
 import com.atguigu.gulimall.order.entity.OrderItemEntity;
+import com.atguigu.gulimall.order.entity.PaymentInfoEntity;
 import com.atguigu.gulimall.order.feign.CartFeignClient;
 import com.atguigu.gulimall.order.feign.MemberFeignClient;
 import com.atguigu.gulimall.order.feign.ProductFeignClient;
 import com.atguigu.gulimall.order.feign.WareFeignClient;
 import com.atguigu.gulimall.order.intecerptor.LoginUserInterceptor;
 import com.atguigu.gulimall.order.service.OrderItemService;
+import com.atguigu.gulimall.order.service.PaymentInfoService;
 import com.atguigu.gulimall.order.vo.*;
 import com.baomidou.mybatisplus.core.toolkit.BeanUtils;
 import com.baomidou.mybatisplus.core.toolkit.IdWorker;
@@ -62,6 +64,8 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
    private RabbitTemplate rabbitTemplate ;
    @Autowired
    private StringRedisTemplate redisTemplate ;
+   @Autowired
+   private PaymentInfoService paymentInfoService ;
 
     @Override
     public PageUtils queryPage(Map<String, Object> params) {
@@ -151,6 +155,27 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
     @Override
     public int cancelOrder(OrderEntity orderEntity) {
         return this.baseMapper.updateById(orderEntity);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public String handelPayResult(PayAsyncVo payAsyncVo) {
+        //保存支付信息
+        PaymentInfoEntity paymentInfo= new PaymentInfoEntity() ;
+        paymentInfo.setAlipayTradeNo(payAsyncVo.getTrade_no());
+        paymentInfo.setCallbackContent("test");
+        paymentInfo.setCallbackTime(new Date());
+        paymentInfo.setConfirmTime(new Date());
+        paymentInfo.setCreateTime(new Date());
+        paymentInfo.setOrderId(111L);
+        paymentInfo.setOrderSn(payAsyncVo.getOut_trade_no());
+        paymentInfo.setPaymentStatus(payAsyncVo.getTrade_status());
+        paymentInfo.setSubject("主题");
+        paymentInfo.setTotalAmount(new BigDecimal(payAsyncVo.getTotal_amount()));
+        paymentInfoService.save(paymentInfo) ;
+        //更新订单的状态为已支付
+        this.baseMapper.updateOrderStstusByOrderSn(payAsyncVo.getOut_trade_no(),OrderConstant.OrderStatus.PAYED.getCode()) ;
+        return "success";
     }
 
     /**

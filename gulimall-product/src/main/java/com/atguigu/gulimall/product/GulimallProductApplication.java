@@ -54,6 +54,10 @@ import org.springframework.session.data.redis.config.annotation.web.http.EnableR
  * @ControllerAdvice
  *  1）、编写异常处理类，使用@ControllerAdvice。
  *  2）、使用@ExceptionHandler标注方法可以处理的异常。
+ *
+ *  5:解决缓存穿透的问题：缓存穿透将导致不存在的数据每次请求都要到存储层去查询
+ *  失去了缓存保护后端的意义，缓存穿透问题可能会使后端存储负载加大，由于很多后端
+ *  存储不具备高并发性甚至可能导致后端存储待机
  */
 @EnableRedisHttpSession
 @EnableFeignClients(basePackages = "com.atguigu.gulimall.product.feign")
